@@ -1,0 +1,725 @@
+\documentclass[a4paper,12pt,leqno]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[left=3cm,right=2cm,top=2cm,bottom=1.5cm]{geometry}
+\usepackage{parskip}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{upgreek}
+\usepackage{mathtools}
+\usepackage{tikz}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=red,
+    urlcolor=red
+}
+
+%%Code style
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.9,0.9,0.9}
+
+\lstset{escapeinside={@}{@}}
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=5
+}
+
+\lstset{style=mystyle}
+
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\orange}[1]{\textcolor{orange}{#1}}
+\newcommand{\violet}[1]{\textcolor{violet}{#1}}
+%%End code style
+
+\title{Rechnerorganisation\\Zusammenfassung SS21}
+\author{Felix Marx}
+
+\begin{document}
+\maketitle
+
+{
+%%Lokales Einfärben des Inhaltverzeichisses
+\hypersetup{linkcolor=black}
+\tableofcontents
+}
+\newpage
+
+\section{Vorlesung 1}
+\subsection{Begriffe}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.4]{Grafiken/Schichtenmodell.png}
+\caption{Das Schichtenmodell ist eine abstrakte Darstellung eines Computers}
+\end{figure}
+
+\begin{itemize}
+\item Abstraktion versteckt unnötige Details
+\item Schichtenmodell teilt Dienstleistungen Schichten zu
+	\begin{itemize}
+	\item Schichten verrichten Arbeit für die nächst höhere
+	\item Vorteile:
+		\begin{itemize}
+		\item Austauschbarkeit von Schichten
+		\item Erfordert i.d.R. nur Kenntnis der aktuellen Schicht
+		\item z.B. Gerätetreiber erfordern Wissen niedrigerer Schichten
+		\end{itemize}
+	\item Nachteile:
+		\begin{itemize}
+		\item ggf. geringere Leistungsfähigkeit
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+Computer ist ein Synonym für Datenverarbeitungssystem bzw. Rechnersystem:
+\begin{quote}
+"\emph{Ein Datenverarbeitungssystem ist eine Funktionseinheit zur
+Verarbeitung und Aufbewahrung von Daten. Verarbeitung umfasst die
+Durchführung \textbf{mathematischer}, \textbf{umformender}, \textbf{übertragender} und
+\textbf{speichernder} Operationen.}"
+\end{quote} 
+Ein Rechnersystem unterscheidet sich von Messgeräten, dadurch dass es über ein ladbares Programm schrittweise eine Funktion ausführt.\\
+
+Minimale Komponenten eines Rechnersystems:
+\begin{itemize}
+\item Prozessor
+\item Speicher
+\item I/O
+\end{itemize}
+
+\subsection{Geschichte}
+{\small
+\begin{tabular}{|l|l|l|}
+\hline
+Bezeichnung & Technik und Anwendung & Zeit\\
+\hline
+Abakus, Zahlenstäbchen & mechanische Hilfsmittel zum Rechnen & bis ca. 18. Jahrhundert\\
+\hline
+mechanische Rechenmaschinen & Apparate zum Rechnen & 1623 bis ca. 1960\\
+\hline
+elektronische Rechenanlagen & Lösen numerischer Probleme &  seit 1944\\
+\hline
+Datenverarbeitungsanlage & Texte und Bilder bearbeiten & seit ca. 1955\\
+\hline
+Informationsverarbeitungssystem & Bilder und Sprache erkennen (KI) & seit 1968\\
+\hline 
+\end{tabular}
+}
+
+Zuse Rechner:
+\begin{itemize}
+\item Z1 (1937): mechanische Rechenmaschine, bestehend aus
+	\begin{itemize}
+	\item Ein-/Ausgabewerk
+	\item Rechenwerk
+	\item Speicherwerk
+	\item Programmwerk, Programm auf gelochten Filmstreifen
+	\end{itemize}
+\item Z2 (1939): Austausch der mechanischen Schaltglieder durch Relais (ca. 200) 10 Hz
+\item Z3 (1941): erster funktionsfähiger Digitalrechner weltweit
+\end{itemize}
+
+\subsection{Ethik}
+\begin{itemize}
+\item Dual Use Problem (Ziviler und militärischer Einsatz)
+\item Digitale Souveränität bezeichnet die Fähigkeit zu selbstbestimmtem Handeln und Entscheiden im digitalen Raum
+	\begin{itemize}
+	\item Selbstbestimmtes Handeln und Entscheiden
+	\item Digitale Medien souverän zu nutzen (Medienkompetenz)
+	\item Fähigkeit Vertrauenswürdigkeit und Integrität der Datenübertragung, -speicherung, -verarbeitung durchgängig zu kontrollieren
+	\item Selbstbestimmung über die Nutzungsbestimmungen für seine Daten
+	\item eigene Fähigkeiten mit Schlüsseltechnologien eigens Dienste und Plattformen zu betreiben
+	\end{itemize}
+\end{itemize}
+
+\section{Vorlesung 2}
+\subsection{Speicher}
+
+
+Speicher können danach klassifiziert werden, ob sie für den Programmierer \textbf{explizit} oder nur \textbf{implizit/transparent} zugreifbar sind.
+\begin{itemize}
+\item explizite Nutzung
+	\begin{itemize}
+	\item interner Prozessorspeicher
+		\begin{itemize}
+		\item schnell, zur temporären Speicherung von Maschinenbefehlen und Daten
+		\item direkter Zugriff durch Maschinenbefehle
+		\item Halbleiter ICs\footnote{IC - Integrated circuit}
+		\end{itemize}
+	\item Hauptspeicher
+		\begin{itemize}
+		\item relativ groß und schnell, für Programme und Daten während der Ausführung
+		\item direkter Zugriff durch Maschinenbefehle
+		\item Halbleiter ICs
+		\end{itemize}
+	\item Sekundärspeicher
+		\begin{itemize}
+		\item sehr groß und langsam, für permanente Speicherung von Programmen und Daten
+		\item indirekter Zugriff über I/O-Programme zur Übertragung in den Hauptspeicher
+		\item Halbleiter ICs, Magnetplatten, optische Laufwerke, Magnetbänder
+		\end{itemize}
+	\end{itemize}
+\item transparente Nutzung
+	\begin{itemize}
+	\item bestimmte Register auf dem Prozessor
+	\item Cache Speicher
+	\end{itemize}
+\end{itemize} 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Grafiken/Speicherhierarchie.png}
+\caption{Speicherhierarchie, die Größe der Speicher nimmt nach oben ab, die Geschwindigkeit nimmt zu}
+\end{figure}
+
+\subsection{Einführung Assembler}
+
+Maschinensprache (Assembler) ist ein primitives Paradigma\footnote{Paradigma bezeichnet ein übergeordnetes Prinzip, welches sich in Beispielen manifestiert}.\\
+Das Programmiermodell von Assembler bezeichnet den Registersatz eines Prozessors, bzw. die Register, die durch Programme angesprochen werden können sowie die verfügbaren Befehle (Befehlssatz). Der Instruction Pointer (IP) und Program Counter (PC) zählen nicht zum Registersatz des Prozessors.\\
+
+Komponenten des Rechnersystems:
+\begin{itemize}
+\item CPU/Prozessor: führt im Hauptspeicher abgelegte Befehle aus
+\item ALU: Ausführung der Operationen
+\item PC: Programmzähler, der auf den nächsten Maschinenbefehl im Hauptspeicher zeigt
+\item Register: Schneller Speicher für Operanden
+\item Hauptspeicher: Speichert Befehle und Daten
+\item Bus Interface: Verbinden der einzelnen Komponenten
+\end{itemize}
+
+\subsubsection{Übersetzung und Ausführung}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{Grafiken/Uebersetzungsprozess.png}
+\caption{Die Phasen der Übersetzung eines C Programmes in binären Maschinencode}
+\end{figure}
+
+\begin{enumerate}
+\item Preprocessor
+	\begin{itemize}
+	\item Aufbereitung durch Ausführung von Direktiven (mit \#) Inhalt der referenzierten Datei wird in Programmdatei kopiert
+	\item Ausgabe: C-Programm mit der Endung .i
+	\end{itemize}
+\item Compiler
+	\begin{itemize}
+	\item Übersetzt das C-Programm name.i in ein Assemblerprogramm name.s
+	\end{itemize}
+\item Assembler
+	\begin{itemize}
+	\item Übersetzt name.s in Maschinensprache in das Objekt-Programm hello.o
+	\end{itemize}
+\item Linker
+	\begin{itemize}
+	\item Zusammenführen verschiedener Module (z.B. printf Funktion)
+	\item Module werden zu einem ausführbaren Programm kombiniert
+	\item Ausgabe des Bindeprogramms: name Datei, welche eine ausführbare Objekt-Datei, die in den Speicher geladen und ausgeführt werden kann
+	\end{itemize}
+\end{enumerate}
+
+Nach dem Übersetzen kann die Objekt-Datei über die Shell ausgeführt werden. 
+Dabei werden zunächst die Zeichen des Kommandos in die Register gelesen und den Inhalt dann in den Hauptspeicher gespeichert.\\
+Anschließend werden Befehle und Daten schrittweise von der Festplatte in den Hauptspeicher kopiert.
+
+\textbf{gcc programm.c} übersetzt das C-Programm\\
+\textbf{gcc -S programm.c} generiert das Assemblerprogramm\\
+
+Verschiedene Optimierungseinstellungen des Compilers lassen sich mit -O1 und -O2 dazuschalten.\\
+Konstante Ausdrücke werden ggf. zur Compilezeit bereits ausgewertet und in Assembler durch das Ergebnis ersetzt.\\
+Wir unterscheiden die Befehle eines Rechnersystems in \textbf{CISC} - Complex Instruction Set Computer und \textbf{RISC} - Reduced Instruction Set Computer.\\
+CISC besitzen viele komplexe Befehle, wohingegen RISC weitgehend Befehle mit identischer Ausführungszeit hat um effizientes Pipelining zu ermöglichen. RISC werden auch als Load/Store-Architekturen bezeichnet.\\
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/Ausfuehrung-eines-Programmes.png}
+\caption{Im letzen Schritt der Ausführung werden die Maschinenbefehle des Programmes ausgeführt}
+\end{figure}
+
+Weiterhin beeinflusst die Struktur eines Prozessors die Leistungsfähigkeit und Kosten des Rechnersystems massiv.\\
+Wir Teilen Rechnersysteme nach der Anzahl der Operanden in einem Maschinenbefehl ein (n-Adressmaschinen).\\
+
+CISC-Maschine: Intel Architektur\\
+2-Adressmaschine: Intel Architektur\\
+RISC-Maschine: ARM Architektur\\
+3-Adressmaschine: ARM Architektur\\
+
+ARM besitzt 16 Register und ein Current Processor Status Register (CPSR). Dabei sind:
+\begin{itemize}
+\item R0: das Rückgaberegister
+\item R1 - R12: frei verwendbar
+\item R13: der Stack Pointer (sp) zeigt auf den Kopf des Stacks
+\item R14: das Link Register (lr) zeigt auf die Rücksprungadresse
+\item R15: der Programm Counter (pc) speichert die aktuelle Programmadresse
+\end{itemize}
+
+Wir unterscheiden in der Speicherorganisation: Big-Endian und Little-Endian.\\
+Bei \textbf{Big-Endian} werden die Bytes vom höchstwertigen Ende an gezählt.\\
+Bei \textbf{Little-Endian} werden die Bytes vom niedrigstwertigen Ende an gezählt.\\
+ 
+In der Adressnummerierung hat bei Big-Endian das MSB also die Adresse 0, bei Little-Endian hat das LSB die Adresse 0.\\
+ARM ist byte-adressiert und verwendet i.d.R. Little-Endian (kann aber manuell festgelegt werden). Ein Wort ist dabei 32 Bit = 4 Bytes lang, somit sind Wortadressen immer Vielfache von 4.
+
+\section{Vorlesung 3}
+\subsection{Grundlegende Assembler Befehle}
+Direktwerte, d.h. Werte welche direkt als solche im Assemblercode geschrieben werden, müssen im Zweierkomplement als 12 Bit Wert repräsentierbar sein.
+\subsubsection{load}
+Mit dem Ladebefehl ldr (load word) wird ein Datenwort von einer Speicheradresse gelesen und in das angegebene Register geschrieben. 
+\begin{lstlisting}
+ldr r1, [r2, #4]
+\end{lstlisting}
+
+Im obigen Beispiel wird ein Datenwort von der Adresse (r2 + 4) gelesen und in das Register r1 geschrieben. Also das zweite\footnote{Da die Datenworte 4 Byte lang sind} Datenwort im Register r2.\\
+Gelesen als Basisadresse r2 plus Offset 4.\\
+Als Basisadresse darf jedes Register verwendet werden.\\
+Der Offset kann auch Hexadezimal angegeben werden (z.B. \#0xC für \#12).\\
+Auch eine Angabe durch ein Register ist erlaubt.
+
+\subsubsection{store}
+Mit dem Speicherbefehl str (store word) wird ein Datenwort in das zweite Register plus Offset geschrieben.
+\begin{lstlisting}
+str r2, [r3, #0x14]
+\end{lstlisting}
+
+Im obigen Beispiel wird das an der Adresse von r2 gespeicherte Datenwort an die Adresse r3 plus 20 = 0x14 geschrieben.
+Der Befehl hat auch eine Byte Variante strb, welche das LSB der gegebenen Adresse an das Ziel schreibt.
+
+\subsubsection{mov}
+Schreibt den angegebenen Wert in das Zielregister.
+\begin{lstlisting}
+mov r1, #0
+\end{lstlisting}
+Im obigen Beispiel wird der Wert 0 an die Adresse r1 geschrieben.
+
+\subsubsection{add}
+Addiert zwei Werte zusammen und schreibt das Ergebnis an die Ergebnisadresse.
+\begin{lstlisting}
+add r0, r0, #4
+\end{lstlisting}
+Im obigen Beispiel wird der Wert an der Adresse r0 um 4 erhöht und dann an die Adresse r0 geschrieben. 
+
+\subsubsection{sub}
+Subtrahiert zwei Werte von einander und schreibt das Ergebnis an die Ergebnisadresse.
+
+\begin{lstlisting}
+sub r3, r6, r9
+\end{lstlisting}
+Im Beispiel wird der Wert an der Adresse r9 vom Wert an der Adresse r6 subtrahiert und an die Adresse r3 geschrieben. 
+
+\subsubsection{mul}
+
+Multipliziert die beiden Operanden mit einander und speichert die least significant 32 Bit an die Ergebnisadresse.
+\begin{lstlisting}
+mul r1, r2, r3
+\end{lstlisting}
+Im Beispiel wird der Wert an der Adresse r2 mit dem Wert an der Adresse r3 multipliziert und an die Adresse r1 geschrieben.
+
+\subsubsection{lsl}
+Ein logischer Shift nach links\footnote{Beim logischen Shift wird der Überfluss abgeschnitten und die leeren Stellen mit 0'en aufgefüllt}. Entspricht einer Multiplikation um die Zahl $2^n$. Dabei wird der Wert im zweiten Register um den Wert im dritten Operanden nach links geshifted.
+\begin{lstlisting}
+lsl r1, r2, r3
+lsl r1, r2, #1
+\end{lstlisting}
+Wenn der dritte Operand ein Register ist, wird nur das least significant byte beachtet. Ist der Operand ein Direktwert, so darf dieser maximal 32 sein.
+
+\subsubsection{lsr}
+Ein logischer Shift nach rechts. Entspricht einer Division um die Zahl $2^n$. Dabei wird der Wert im zweiten Register um den Wert im dritten Operanden nach rechts geshiftet.
+\begin{lstlisting}
+lsr r1, r2, r3
+lsr r1, r2, #1
+\end{lstlisting}
+Die selben Einschränkungen wie bei lsl gelten.
+
+\subsection{Flags}
+Wichtige Flags sind:
+\begin{itemize}
+\item CF Übertragsflag (Carryflag)
+\item ZF Nullflag (Zeroflag)
+\item SF Vorzeichenflag (Signflag)
+\item OF Überlaufflag (Overflowflag)
+\end{itemize}
+
+\textbf{Unterscheidung zwischen CF und OF Flags:}\\
+Overflowflag (OF) wird gesetzt, wenn wir z.B. zwei positive Zahlen addiert werden, aber aufgrund eines Speicherüberflusses das Ergebnis negativ ist.\\
+
+Carryflags (CF) werden gesetzt, wenn wir z.B. eine positive und eine negative Zahl addieren, und das Ergebnis noch korrekt darstellbar ist, aber in der binären Addition ein Bit überläuft. Zum Beispiel so:
+\begin{tabbing}
+---\=---\=0000----\=\kill
+\>\>0101\>5\\
+\>\>1111\>-1\\
+\>\>------\\
+\>1\>0100\>4
+\end{tabbing}
+
+Ist das Ergebnis negativ wird das Signflag (SF) auf 1 gesetzt.
+
+\subsection{Assembler Sprungbefehle}
+
+\subsubsection{Unbedingte Sprünge}
+Unbedingte Sprünge (b) werden immer ausgeführt sobald sie im Programmablauf erreicht werden.\\
+Die Sprungadressen werden mit Labels im Programmcode festgelegt und mit einem Doppelpunkt abgeschlossen.
+\begin{lstlisting}
+mov r1, #4
+b label
+sub r1, r1, #2
+label:
+...
+\end{lstlisting}
+
+\subsubsection{beq}
+Der Sprung wird nur ausgeführt falls das Zeroflag (ZF) gesetzt ist.\\
+Dabei wird i.d.R. vor dem Sprungbefehl der Vergleichsbefehl cmp aufgerufen, welcher zwei Werte durch Subtraktion vergleicht.
+Der Befehl cmp muss als ersten Parameter immer ein Register bekommen, der zweite Parameter ist beliebig.
+\begin{lstlisting}
+mov r0, #4
+cmp r0, #8 /* setzte Flags auf Basis von r0 - 8 = -4 @$\Rightarrow$@ NZCV = 1000 */
+beq label /* Hier kein Sprung, da Z != 1 */
+...
+label:
+\end{lstlisting}
+
+\subsection{If-Verzweigungen}
+In Hochsprache:
+\begin{lstlisting}
+if (r0 == r1)
+	r2 = r3 + 1;
+r2 = r2 - r3;
+\end{lstlisting}
+
+In Assembler negieren wir die Bedingung, sodass falls diese erfüllt ist wir den konditionalen Block überspringen können.
+\begin{lstlisting}
+cmp r0, r1
+bne L1 /* Springt falls Werte ungleich @$\Leftrightarrow$@ Z = 0 */
+add r2, r3, #1
+L1:
+sub r2, r2, r3
+\end{lstlisting}
+
+\subsection{If-Else-Verzweigungen}
+In Hochsprache:
+\begin{lstlisting}
+if (r0 == r1)
+	r2 = r3 + 1;
+else
+	r2 = r2 - r3;
+\end{lstlisting}
+
+In Assembler negieren wir wieder die Bedingung, um somit direkt in den else Case zu springen, hängen ans Ende des if-Blockes noch einen unbedingten Sprungbefehl, um den else-Block zu überspringen.
+\begin{lstlisting}
+cmp r0, r1
+bne L1
+add r2, r3, #1
+b L2
+L1:
+sub r2, r2, r3
+L2:
+\end{lstlisting}
+
+\subsection{while-Schleifen}
+In Hochsprache:
+\begin{lstlisting}
+int pow = 1;
+int x = 0;
+while (pow != 128) {
+	pow = pow * 2;
+	x = x + 1; 
+}
+\end{lstlisting}
+In Assembler überprüfen wir nach unserer Einstiegsmarke, ob die negierte Fortsetzungsbedingung erfüllt ist und beenden die Ausführung im positiven Fall. Sonst wird der Schleifenkörper ausgeführt und wir springen unbedingt zur Einstiegsmarke zurück.
+\begin{lstlisting}
+mov r0, #1
+mov r1, #0
+WHILE:
+cmp r0, #128
+beq DONE
+lsl r0, r0, #1 /* pow = pow * 2 */
+add r1, r1, #1 /* x = x + 1 */
+b WHILE
+DONE: 
+\end{lstlisting}
+
+\subsection{for Schleifen}
+In Hochsprache:
+\begin{lstlisting}
+int sum = 0;
+int i;
+for (i = 0; i < 10; i = i + 1) {
+	sum = sum + i;
+}
+\end{lstlisting}
+
+In Assembler prüfen wir direkt nach der Einstiegsmarke, ob die negierte Fortsetzungsbedingung erfüllt ist und beenden im positiven Fall. Sonst wird der Schleifenkörper ausgeführt und im Anschluss Zähler entsprechend angepasst. Dann springen wir unbedingt zur Einstiegsmarke zurück.
+\begin{lstlisting}
+mov r1, #0
+mov r0, #0
+FOR:
+cmp r0, #10
+bge DONE /* Springe falls der gilt r0 > 10 @$\Leftrightarrow$@ N != 0 && Z = 0 */
+add r1, r1, r0 /* sum = sum + i */
+add r0,r0, #1 /* i = i +1 */
+b FOR
+DONE:
+\end{lstlisting}
+
+\section{Vorlesung 4}
+
+\subsection{Nutzen des Hauptspeichers}
+Anstatt Werte als Direktwerte zu benutzen, können sie auch als Variablen im Datenbereich des Programms definiert werden.
+\begin{lstlisting}
+.data /* Datenbereich */
+var1: .word 5 /* Variable 1 im Speicher mit Wert 5 */
+var2: .word 12 
+var3: .word 15
+
+.global main /* Definition Einsprungpunkt Hauptprogramm */
+
+main: /* Hauptprogramm */
+	ldr r0, var1 /* laedt Wert von var1 in r0 */
+	
+	ldr r1, adr_var2 /* laedt Adresse von var2 in r1 */
+	ldr r2, [r1] /* Laedt den Inhalt von Adresse r1 in r2 */
+
+	ldr r3, =var3 /* Laedt die Adresse von var3 direkt in r3 */
+	ldr r4, [r3] /* Laedt den Inhalt von Adresse r3 in r4 */
+	
+	add r0, r0, r2
+	bx lr /* Springe zurueck zum aufrufenden Programm */
+
+adr_var2: .word var2 /* Adresse von Variable 2 */
+\end{lstlisting}
+Die Daten in var1 werden direkt adressiert, die Daten in var2 werden indirekt adressiert. Die Abkürzung für die Adresse einer im Datenbereich definierten Variable ist:\\ =variablenname, wie bei var3 dargestellt.\\
+
+Die einzelnen Registerfelder liegen direkt übereinander, sodass wenn wir Zeile 15 durch:
+\begin{lstlisting}
+ldr r4, [r3, #8]
+\end{lstlisting}
+ersetzen, die Adresse (r3 + 8) = (r2 + 4) = r1 erhalten und von dieser Adresse den Wert 12 an r4 schreiben.
+
+\subsection{Arrays}
+Arrays oder auch Datenfelder können als konsekutive Datenwörter aufgefasst werden welche übereinander im Speicher liegen, sodass der Index eines einzelnen Feldes dem Offset von der Basisadresse entspricht.\\
+Dabei lädt man i.d.R. die Basisadresse des Arrays in ein Register und den Index in ein weiteres. Um nun auf einzelne Datenwörter zuzugreifen, muss der Index um die Wortbreite (4 Bytes) multipliziert werden.
+\begin{lstlisting}
+mov r0, #0x11111 /* Basisadresse des Arrays */
+mov r1, #0 /* Index i */
+...
+lsl r2, r1, #2 /* r2 = i * 4 (Offset) */
+ldr r3, [r0, r2] /* Laedt das indizierte Arrayelement */
+\end{lstlisting}
+
+\subsection{Unterprogramme}
+
+Unterprogramme helfen bei der strukturierten Programmierung, indem Teile des Hauptprogrammes in Teilprogramme (TP) ausgelagert werden.\\
+Man unterscheidet zwischen Makrotechnik und Unterprogrammtechnik.
+Bei der \textbf{Makrotechnik} wird das Programm an den benötigten Stellen einkopiert, dabei wird dem TP, dem sogenannten Makro, ein Name zugeordnet (Makroname). An den Stellen wo das Makro einkopiert werden soll, wird der Makroname genannt.\\
+Bei der \textbf{Unterprogrammtechnik} ist das Unterprogramm (UP) nur einmal im Code vorhanden. Es wird durch eine Marke (Unterprogrammname) gekennzeichnet. Soll das UP aufgerufen werden, erfolgt ein Sprungbefehl mit der Marke als Operand.
+Am Ende des UPs erfolgt die Rückkehr in das aufrufende Programm mittels speziellem Sprungbefehl (z.B. bx). Die Rückkehradresse wird in Registern oder auf dem Stack gespeichert.\\
+
+Lokale Variablen werden i.d.R. über den Stack realisiert.
+Als Regel für Prozeduraufrufe gilt:
+\begin{itemize}
+\item Der Aufrufer übergibt Argumente an den Aufgerufenen und springt zum Aufgerufenen
+\item Der Aufgerufene führt eine Funktion/Prozedur aus und gibt das Ergebnis an den Aufrufer zurück (r0)
+\item Die Rücksprungadresse liegt direkt hinter der Aufrufstelle
+\item Der Aufgerufene darf keine Register oder Speicherstellen überschreiben, die im Aufrufer genutzt werden
+\item Aufgerufene Unterprogramme dürfen keine unbeabsichtigten Seiteneffekte haben
+\end{itemize}
+
+\begin{lstlisting}
+main:
+mov r0, #4 /* Argument 0 ist 4 */
+mov r1, #30 /* Argument 1 ist 30 */
+bl sum /* Funktionsaufruf, bl legt Rueckkehradresse in r14 (lr) */
+mov r2, r0 /* r0 ist der Rueckgabewert */
+
+sum: /* Unterprogrammname */
+add r2, r0, r1 /* Fuehrt seine Funktion aus */
+mov r0, r2 /* Legt Rueckgabewert in r0 ab */
+mov pc, lr /* Ruecksprung zum Aufrufer */
+\end{lstlisting}
+
+\section{Vorlesung 5}
+\subsection{Stack}
+Der Stack wächst bei ARM nach unten, d.h. von hohen zu niedrigen Speicheradressen.
+Der Stackpointer: r13 (sp) zeigt auf das oberste Element des Stacks.\\
+
+\begin{lstlisting}
+sub sp, sp, #8 /* reserviert Speicher fuer 2 Woerter auf dem Stack */
+str r8, [sp, #4] /* sichert den Wert von r8 auf dem Stack */
+str r7, [sp] 
+...
+ldr r7, [sp] /* stellt den Wert von r7 wieder her */
+ldr r8, [sp, #8] /* stellt den Wert von r8 wieder her */
+add sp, sp, #8 /* gibt den Speicher auf dem Stack wieder frei */
+\end{lstlisting}
+
+Werden weiter Unterprogramme aufgerufen, muss auch die Rücksprungadresse lr auf dem Stack gesichert werden, sonst geht diese beim Prozeduraufruf verloren.\\
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{Grafiken/stackManipulation.png}
+\caption{Repräsentation des Stacks vor, während und nach der Programmausführung}
+\end{figure}
+
+Kurzschreibweisen (Pseudoinstruktionen) für das reservieren/freigeben von Speicher und dem ablegen/wiederherstellen von Wörtern sind die Instruktionen:
+\begin{lstlisting}
+push {lr} /* Ablegen der Ruecksprungadresse*/
+...
+pop {lr} /* Wiederherstellen der Ruecksprungadresse */
+\end{lstlisting}
+
+\subsection{Rekursion}
+Bei einer rekursiven Programmausführung repräsentiert die Anzahl an Rücksprungadressen auf dem Stack im wie vielen Aufruf wir uns befinden. Der Ablauf eines Unterprogramms wird auch als Inkarnation (wiederholter Unterprogrammaufruf) bezeichnet.\\
+Auszug einer rekursiven Funktion:
+\begin{lstlisting}
+.text /* markiert den Beginn eines Code Segments */
+fak:      push {r0, lr}
+		cmp r0, #1 /* Rekursionsende pruefen */
+		blt else /* branch less @$\Leftrightarrow$@ N = 1 */
+		sub r0, r0, #1 /* n-1 */
+		bl fak /* rekursiver Funktionsaufruf */
+		/* Ruecksprungadresse beim zurueckgehen */
+
+RA_2:	ldr r1, [sp, #4] /* laden von n */
+		mul r0, r1, r0 /* fak(n-1) * n */
+fin:      pop {lr} /* laden der Rueckkehradresse */
+		add sp, sp, #4 /* Freigeben des Stackspeichers */
+		bx lr	/* Sprung zum Aufrufer */
+		
+else:	mov r, #1	/* Rekursionsanker */
+		b fin /* Rekursionsende, abbauen des Stacks */
+\end{lstlisting}
+
+\section{Vorlesung 6}
+\subsection{OpenMP}
+OpenMP ist eine Sammlung von Compiler-Anweisungen (Direktiven) und Bibliotheksfunktionen für die Thread Programmierung.\\
+Es ist eine Kombination von C, C++ und Fortran. Dadurch wird threadparalleles Arbeiten ermöglicht.\\
+OpenMP startet als einzelner Thread und forkt für einzelne parallele Programmabschnitte zusätzliche Threads. Nach Abschluss joinen die Threads wieder zusammen. Dies wird auch \textbf{Fork-Join-Programmiermodell} bezeichnet.\\
+
+\begin{lstlisting}
+#include<omp.h> /* OpenMP Library */
+...
+#pragma omp parallel for private(x) reduction(+:sum)
+for( i = 0; i < num_steps; i++) {
+	x = (i + 0.5) * step;
+	sum += 4.0 / (1.0 + x * x)
+}
+...
+\end{lstlisting}
+
+\subsection{Assembler}
+Der Assembler ist ein Programm, dass die Aufgabe hat, Assemblerbefehle in Maschinencode zu transformieren und dabei symbolische Namen Maschinenadressen zuweist und eine oder mehrere Objektdatei(en) erzeugt.\\
+Varianten sind Crossassembler, welche Maschinencode für eine andere Plattform erzeugen als sie gerade laufen, sowie Disassembler welche Maschinensprache in Assemblersprache übersetzen.\\
+
+Die Übersetzung erfolgt in zwei Schritten:\\
+1. Schritt:
+\begin{itemize}
+\item Auffinden von Marken um Beziehungen zwischen symbolischen Namen und Adressen zu kennen (Syntax- und Kontextanalyse)
+\item Übersetzen jedes Assemblerbefehls durch Kombination der Opcodes\footnote{Nummer des entsprechenden Maschinenbefehls}, Bezeichner und Marken zu legalen Instruktionen (Codegen)
+\end{itemize}
+2. Schritt: Erzeugen einer oder mehrerer Objektdateien. Diese ist meist nicht ausführbar, da sie auf Funktionalitäten anderer Dateien angewiesen ist.
+
+Probleme bei den Schritten:
+\begin{itemize}
+\item Bei Schritt 1 sind zukünftige Marken nicht bekannt $\rightarrow$ Aufteilen in Syntax- und Kontextanalyse (2 Läufe)
+\item Bei Schritt 2 werden in der Objektdatei absolute Adressen verwendet
+	\begin{itemize}
+	\item Programm kann direkt ausgeführt werden, aber der Speicherort muss vorher bekannt sein
+	\item Nachträgliches verschieben des Programms ist nicht möglich
+	\end{itemize}
+\item Bei Schritt 2 werden relative Adressen verwendet, und die aktuelle Adresse bei Programmbeginn übergeben
+	\begin{itemize}
+	\item Erzeugt ggf. mehrere Objektdateien
+	\item Adressen werden relativ zu den einzelnen Objektdateien vergeben
+	\item Vor Ausführung sind weitere Transformationsschritte nötig, Aufgabe des Binders/Linkers und Laders
+	\end{itemize}
+\end{itemize}
+
+\subsection{Objekt-Programme}
+Wir unterscheiden:
+\begin{itemize}
+\item Relocatable object files: Enthält binären Code und Daten, sodass diese mit anderen relocatable object files zu einem ausführbaren Objektfile zusammengefügt werden können
+\item Executable object files: Enthält binären Code und Daten, welche direkt in den Speicher kopiert und ausgeführt werden können
+\item Shared object files: Spezialfall der relocatable object files, welche in den Speicher geladen werden können und dynamisch mit anderen Objekt-Files zusammengeführt werden können 
+\end{itemize}
+In der Regel generieren Compiler und Assembler relocatable object files.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/relocatableObjectFile.png}
+\caption{Das Format eines typischen ELF relocatable object files}
+\end{figure}
+Ein ELF\footnote{ELF - Executable and Linkable Format} relocatable object file beginnt mit einer 16-Byte Sequenz:
+\begin{itemize}
+\item Wort-Größe
+\item Byte-Ordering
+\item Weitere Infos für den Binder/Linker z.B. Maschinentyp
+\end{itemize} 
+
+Die einzelnen Segmente des files haben folgende Bedeutung:
+\begin{itemize}
+\item .text Maschinencode des compilierten/assemblierten Programms
+\item .rodata Daten, welche nur gelesen werden müssen z.B. Formatierungsstrings oder Sprungtabellen für switch
+\item .data Initialisierte globale Variablen
+\item .bss\footnote{Block Storage Start, Better Save Space} Uninitialisierte globale Variablen
+\item .symtab Symboltabelle mit Infos über Funktionen und globale Variablen
+\item .rel.text Liste an Stellen, welche beim Linken modifiziert werden müssen, z.B. Kombination mit anderen files
+\item .rel.data Relocations Informationen für globale Variablen
+\item .debug Debugging Symboltabelle (Nur erzeugt, falls C-Compiler mit -g aufgerufen wurde)
+\item .line Zuordnung der C-Anweisung zu Maschinencode (Nur falls -g gesetzt)
+\item .strtab Zeichentabelle für Symboltabelle udn Debugging Symboltabelle
+\end{itemize}
+
+Diese Datei kann mit dem Befehl \textbf{readelf -h filename.o} geöffnet werden.\\
+Mit \textbf{readelf -a filename.o} erhält man eine Übersicht über die wichtigsten Einträge.\\
+Mit \textbf{objdump -S filename.o} erhält man den Maschinencode.\\
+
+Analysewerkzeuge sind:
+\begin{itemize}
+\item IDA, ein kommerzieller Disassembler
+\item Ghidra: Reverse-Engineering-Werkzeug der NSA
+\end{itemize}
+
+\subsection{Binder und Lader}
+
+Der Binder (linker) hat die Aufgabe aus mehreren einzelnen verschiebbaren Objekt files ein ausführbares Objektprogramm zu erzeugen, indem die noch offenen externen Referenzen aufgelöst werden.\\
+Das Objektprogramm kann dann durch einen Lader zur Ausführung gebracht werden.\\
+Ein Lader (loader) ist ein Systemprogramm, welches Objektprogramme in den Speicher lädt und ggf. deren Ausführung anstößt.\\
+Der Lader lädt ein Programmmodul (Lademodul) beginnend mit einer vom Betriebssystem vorgegebenen Startadresse in den Hauptspeicher.\\
+Varianten sind:
+\begin{itemize}
+\item absolutes Laden
+\item relatives Laden
+\item dynamisches Laden zu Laufzeit
+\end{itemize}
+
+\subsection{Laufzeit}
+
+Laufzeitmessungen von Programmen auf Assemblerebene können mit sogenanntem Programm Profiling durchgeführt werden.\\
+Mit \textbf{gcc -pg -o functionname programmname.c} kann eine Objektdatei erzeugt werden, welche ein solches Profiling durchführt. Die Datei wird mit \textbf{./functionname} ausgeführt, dann lässt man sich mit \textbf{gprof functionname} die Profile Datei ausgeben.\\
+Dies gibt Aufschluss über eventuelle Bottlenecks und zeigt Informationen wie z.B. die Zeit die das Programm in einzelnen Subroutinen verbracht hat. Aufbauend darauf kann dann z.B. Loop-Unrolling oder Thread Programmierung durchgeführt werden.
+
+\end{document}
