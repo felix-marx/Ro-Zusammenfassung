@@ -353,6 +353,14 @@ lsr r1, r2, #1
 \end{lstlisting}
 Die selben Einschränkungen wie bei lsl gelten.
 
+\subsubsection{ORR/AND}
+Ein logisches bitweises OR bzw. AND, das Ergebnis wird in das erste Register geschrieben. Der zweite Operand muss ein Register sein, der dritte Operand ist beliebig.
+\begin{lstlisting}
+AND r1, r2, #0x1234
+ORR r1, r2, r3
+\end{lstlisting}
+
+
 \subsection{Flags}
 Wichtige Flags sind:
 \begin{itemize}
@@ -722,4 +730,465 @@ Laufzeitmessungen von Programmen auf Assemblerebene können mit sogenanntem Prog
 Mit \textbf{gcc -pg -o functionname programmname.c} kann eine Objektdatei erzeugt werden, welche ein solches Profiling durchführt. Die Datei wird mit \textbf{./functionname} ausgeführt, dann lässt man sich mit \textbf{gprof functionname} die Profile Datei ausgeben.\\
 Dies gibt Aufschluss über eventuelle Bottlenecks und zeigt Informationen wie z.B. die Zeit die das Programm in einzelnen Subroutinen verbracht hat. Aufbauend darauf kann dann z.B. Loop-Unrolling oder Thread Programmierung durchgeführt werden.
 
+\section{Vorlesung 7}
+\subsection{Microarchitekturen}
+Die Befehlsausführung funktioniert grob in mehreren Schritten:
+\begin{enumerate}
+\item Befehlsholphase (instruction fetch): Das Steuerwerk liest die Befehle in den Speicher (Register)
+\item Befehlsdekodierung (instruction decode): Dekodiert den Befehl
+\item Befehlsausführung (instruction execute): Befehl wird ausgeführt, der nächste Befehl wird geholt
+\end{enumerate}
+
+Damit die Komponenten eines Rechnersystems kommunizieren können muss i.d.R. ein gemeinsamer Takt existieren.\\
+Dieser wird als $f=\frac{1}{T}$, mit $T$ als Periodendauer bestimmt. Je höher der Takt, desto schneller werden Daten verarbeitet.\\
+Der Leistungsumsatz ist $P\approx U^2 \cdot f \cdot C_L$.\\
+
+Terminologie:
+\begin{itemize}
+\item ISA: instruction set architecture (Menge der verfügbaren Befehle)
+\item RISC: reduced instruction set computer (kleine und schnell ausführbare ISA) z.B. ARM
+\item CISC: complec instruction set computer (schwergewichtige ISA) z.B. Intel
+\item SIMD: single instruction multiple data (vector processing) z.B. NEON
+\item VLIW: very long instruction word (static multi-issue), superscalar processor
+\item $\mu$arch microarchitecture (ISA Implementierung):
+	\begin{itemize}
+	\item Anzahl der Befehle pro Zyklus (IPC)
+	\item Pipelining für Instruktionslevel Parallelismus (ILP)
+	\item Sprungvorhersage
+	\item out-of-order execution von Befehlen 
+	\item multi-issue systems (startet mehrere Befehle pro Zyklus)   
+	\end{itemize}
+\end{itemize}
+
+Wir unterscheiden verschiedene Architekturen:
+\begin{itemize}
+\item Eintakt-Implementierung/-Prozessor: Jeder Befehl wird in einem Takt ausgeführt
+\item Mehrtakt-Implementierung: Jeder Befehl wird in Teilschritte zerlegt
+\item Pipelined-Implementierung: Jeder Befehl wird in Teilschritte zerlegt und diese parallel ausgeführt
+\end{itemize}
+
+Die Ausführungszeit eines Programmes ergibt sich als:\\
+Ausführungszeit = (\#Instruktionen) $\cdot$ (Takte pro Instruktion) $\cdot$ (Sekunden pro Takt)\\
+
+Takte pro Instruktion $:=$ CPI\footnote{cycles per instruction}\\
+Sekunden pro Takt $:=$ Taktperiode\\
+$\frac{1}{CPI}$ = Instruktionen pro Takt = IPC\footnote{instructions per cycle}
+
+\subsection{Eintaktprozessor}
+\label{Architekturzustand}
+Mit dem Architekturzustand bezeichnen wir die für den Programmierer zugänglichen Daten.
+Dazu zählen:
+\begin{itemize}
+\item PC - Programm Counter
+\item 16 Register
+\item Speicher
+\end{itemize}
+
+Wir unterscheiden zwei Speichersysteme:
+\begin{itemize}
+\item Von-Neumann-Architektur
+	\begin{itemize}
+	\item gemeinsamer Speicher für Maschinenbefehle und Daten
+	\end{itemize}
+\item Harvard-Architektur
+	\begin{itemize}
+	\item Befehlsspeicher und Datenspeicher sind getrennt
+	\end{itemize}
+\end{itemize}
+
+Dabei kann der Speicher bezogen auf den Takt asynchron gelesen werden, aber nur synchron geschrieben werden.\\
+
+\subsubsection{Entwicklung des Datenpfades am Eintaktprozessor}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Grafiken/ldr-Befehl.png}
+\caption{Aufbau des ldr Befehls, n:m bezeichnet, dass der Bereich Bit m bis n umfasst}
+\label{ldrBefehl}
+\end{figure}
+
+Wir beginnen mit der Entwicklung des Datenpfades für den LDR (ldr Rd, [Rn, imm12]) Befehl:\\
+Im ersten \textcolor[rgb]{1, 0.7098, 0.4392}{hell-orange} markierten Schritt wird der Befehl im neuen Takt vom Instruction Memory geholt.\\
+Im zweiten \textcolor[rgb]{0.1765,0.4627,0}{dunkel grün} markierten Schritt wird der Quell-Operand Rn vom Register file gelesen.\\
+Im dritten \textcolor[rgb]{0,0.4314,0.6863}{cyan blau} markierten Schritt wird der Offset ausgewertet und zur weiteren Benutzung auf 32 Bit extended. Außerdem legen wir die Zieladresse an den passenden Port A3 an.\\
+Im vierten \textcolor[rgb]{1,0,0}{rot} markierten Schritt wird der erweiterte Immendiate mit der Basisadresse RD1, welche vom Register file aus der an A1 anliegenden Registernummer ermittelt wird, addiert um die tatsächliche Adresse zu erhalten.\\
+Im fünften \textcolor[rgb]{0.2,0.2,1}{magenta blau} markierten Schritt gibt der Data Memory Block die an der Adresse liegenden Daten an WD3 (Write data 3) weiter. Außerdem wird das RegWrite Steuersignal auf 1 gesetzt um die Daten aus WD3 an die Zieladresse A3 zu schreiben.\\
+Im sechsten \textcolor[rgb]{0,0.4,0.4}{dunkel cyan} markierten Schritt wird die Adresse des nächsten Befehls (PC + 4 Byte) berechnet und angelegt.\\
+Im siebten \textcolor[rgb]{1,0.851,0.4}{mittel gelb} markierten Schritt wird der Prozessor um die Möglichkeit erweitert die PC Adresse zu verwenden (Sowohl Quelle als auch Ziel). Da per Definition in der ARM Architektur das Lesen am Register R15 den PC + 8 zurückgibt, muss hierfür die nächste Befehlsadresse um 4 Byte inkrementiert werden und an der entsprechenden Stelle am Register file angelegt werden. Da PC aber auch geschrieben werden kann, muss noch der entsprechende Pfad vom Data Memory Block zur Auswahl an einen Multiplexer angelegt werden.\\
+
+Um dieses Rechnersystem nun um den Befehl store (str) zu erweitern, welcher den Wert vom ersten Operanden Rd an die ermittelte Adresse aus dem zweiten Rn und dritten Operanden imm12 schreibt, muss einer Verbindung zwischen Rd und A2 hergestellt werden. Außerdem muss dann die Adresse von RD2 nun an den Write Data WD Port angelegt werden. Dies geschieht im \textcolor[rgb]{1,0.6,1}{hell magenta} markierten Schritt.
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.51]{Grafiken/strEintakt.jpg}
+\caption{Eintaktprozessor für die Befehle ldr und str}
+\end{figure}
+
+Die Operation welche die ALU ausführt, wird mit folgenden über ALUControl gesteuerten Flags festgelegt:\\
+
+\begin{tabular}{|l|l|}
+\hline
+$ALUControl_{1:0}$ & Function\\
+\hline
+00 & Add\\
+01 & Subtract\\
+10 & AND\\
+11 & OR\\
+\hline
+\end{tabular}
+
+%%if anything gets added above this needs to be removed
+\newpage
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.65]{Grafiken/Eintaktprozessor.png}
+\caption{Der vollständige ARM Eintaktprozessor mit Kontrolleinheit}
+\end{figure}
+
+
+Die Flags der Kontrolleinheit haben folgende Bedeutungen:\\
+{\footnotesize
+\begin{tabular}{|l|l|l|}
+\hline
+Flag & Belegung & Bedeutung\\
+\hline
+PCSrc 	& 0 & PC soll auf den im Programm nachfolgenden Befehl zeigen\\
+ 		& 1 & PC soll auf eine berechnete Stelle im Programm zeigen\\
+\hline
+MemtoReg & 0 & Die Ergebnisdaten stammen aus einer Berechnung der ALU (z.B. ADD)\\
+		& 1 & Die Ergebnisdaten stammen aus einem Register (z.B. LDR)\\
+\hline
+MemWrite & 0 & Gebe Daten über RD weiter an die Register File\\
+		& 1 & Schreibe die Daten welche an der Adresse WD liegen in die Adresse A\\
+\hline
+ALUSrc & 0 & Verwende einen Wert aus einem Register für die Berechnung\\
+	 & 1 &  Verwende den erweiterten Direktwert für die Berechnung\\
+\hline
+ImmSrc & 00 & Erweitere um 24 0-Bits bei arithmetischen/logischen Befehlen ($\{24'b0, Instr_{7:0}\}$)\\
+	 & 01 & Erweitere um 20 0-Bits bei ldr/str Befehlen ($\{20'b0, Instr_{11:0}\}$)\\
+	 & 10 & Erweitere um 6 Vorzeichenbits bei Branch ($\{6\{Instr_{23}, Instr_{23:0}\}\}$)\\
+\hline
+RegWrite & 0 & Es soll nicht ins Zielregister geschrieben werden\\
+		& 1 & Das an WD3 anliegende Ergebnis soll in das Zielregister A3 geschrieben werden\\
+\hline
+RegSrc & 0 & Es existiert ein zweiter Operand, welcher vom Zielregister verschieden ist (z.B. ADD)\\
+		& 1 & Es sollen Werte aus dem Zielregister ausgelesen werden (z.B. STR), bzw.\\
+		& & es soll ein Sprung ausgeführt werden, d.h. nehme Wert aus R15 (PC), dann gleichzeitig\\
+		& & ImmSrc = 10, MemtoReg = 0 und PCSrc = 1 um das Ergebnis zu übernehmen\\
+\hline
+\end{tabular}
+}
+
+Sprungbefehle:\\
+Bei Sprungbefehlen wird der nächste PC durch eine Berechnung ermittelt. Dabei wird der zukünftige PC auch als BTA - Branch Target Address bezeichnet.\\
+Diese wird als $BTA = (ExtImm) + (PC + 8)$ berechnet, wobei $ExtImm = Imm24 << 2$ (ImmSrc = 10) ist.
+
+\subsubsection{Kontrolleinheit}
+Die Kontrolleinheit setzt sich aus zwei Teilen zusammen, der Conditional Logic und dem Decoder.\\
+Die Kontrolleinheit berechnet die Steuersignale entsprechend der cond, op und funct Felder im Befehl (\hyperref[ldrBefehl]{Bit $Instr_{31:20}$}), sowie der von der ALU generierten ALUFlags und dem Fakt ob der PC das Zielregister ist.\\
+Die Conditional Logic speichert die ALUFlags und veranlasst nur eine Änderung des \hyperref[Architekturzustand]{Architekturzustands}, wenn die Instruktion nur bedingt ausgeführt werden soll.\\
+Der Decoder generiert Steuersignale basierend auf der Instruktion.\\
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.8]{Grafiken/Eintakt-Kontrolleinheit.png}
+\caption{Die Kontrolleinheit des Eintaktprozessors}
+\end{figure}
+
+Die $FlagW_{1:0}$ Information gibt an, welche ALUFlags (NZCV) gespeichert werden sollen.\\
+Die ADD, SUB Befehle updaten alle Flags, wohingegen AND, ORR nur NZ verändern können. Daraus ergibt sich folgende Interpretation:\\ $FlagW_1 = 1$ NZ ($ALUFlags_{3:2}$) wird gespeichert\\ $FlagW_0 = 1$ CV ($ALUFlags_{1:0}$) wird gespeichert
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/Eintakt-Kontrolleinheit_Belegung-ANDEQ.png}
+\caption{Beispielbelegung der Kontrollsignale für den Befehl: ANDEQ r5, r6, r7}
+\end{figure}
+Die Belegung von Cond, Op, Funct ergibt sich aus den \href{http://www.heenes.de/ro/material/arm/arm-instructionset.pdf}{Datenblättern}.
+
+\section{Vorlesung 8}
+\subsection{Mehrtaktprozessor}
+
+Im folgenden Mehrtaktprozessor wird keine Harvard-Architektur, sondern eine Von-Neumann-Architektur\footnote{D.h. gemeinsamer Instruktions- und Datenspeicher} verwendet und ist auch heute weiter verbreitet. Trotzdessen könnte ein Mehrtaktprozessor auch eine Harvard-Architektur sein.\\
+Ein Eintaktprozessor kann hingegen keine Von-Neumann-Architektur sein, da so im selben Takt auf zwei verschiedene Adressen zugegriffen werden müsste.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/Mehrtakt.png}
+\caption{Ein Mehrtakt-Prozessor mit Kontrolleinheit}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/Mehrtakt-Kontrolleinheit.png}
+\caption{Aufgeschlüsselte Kontrolleinheit des Mehrtaktprozessors}
+\label{fig:kontrolleinheit}
+\end{figure}
+
+Die Kontrolleinheit des Prozessors basiert auf einer FSM, welche die einzelnen Phasen der Befehlsausführung modelliert und die Steuersignale entsprechend der Phase vorgibt. Jede Phase wird durch einen eigenen Zustand beschrieben, sodass der Prozessor die entsprechenden Aktionen ausführt.\\
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{Grafiken/Mehrtakt-Steuerwerk.png}
+\caption{Das Steuerwerk für die Ausführung des Befehls ldr, welches das Verhalten der Kontrolleinheit in den einzelnen Ausführungsphasen beschreibt.}
+\end{figure}
+
+Ein Mehrtaktprozessor hat in der Regel eine höhere Taktfrequenz und einfache Instruktionen laufen schneller. Außerdem findet eine bessere Wiederverwendung von Hardware in verschiedenen Taktet statt, hat dafür jedoch eine aufwendigere Ablaufsteuerung.\\
+
+Sie besitzen jedoch die selben Grundkomponenten.
+\begin{itemize}
+\item Datenpfad: verbindet funktionale Blöcke
+\item Kontrollpfad: Steuersignale/Steuerwerk
+\end{itemize}
+
+%%if anything gets added further up this needs to be removed
+\newpage
+
+\section{Vorlesung 9}
+
+\subsection{Pipeline-Prozessor}
+
+Bei ARM wird die Befehlsausführung in fünf Schritte unterteilt:
+\begin{enumerate}
+\item Instruction Fetch
+\item Instruction Decode, Read Register
+\item Execute ALU
+\item Memory Read/Write
+\item Write Register
+\end{enumerate}
+
+Wir verwenden folgende Abkürzungen:
+\begin{itemize}
+\item IM - Instruction Memory (Befehlsspeicher)
+\item RF - Register Field (Registerfeld)
+\item DM - Data Memory (Datenspeicher)
+\end{itemize}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/PipelineProzessor-optimiert.png}
+\caption{Ein optimierter Pipeline Prozessor, jede Pipelinestufe ist eine Stufe der Befehlsausführung.}
+\end{figure}
+Damit das richtige Writeback Register verwendet wird, wird dieses als WA3D durch die Stufen gereicht. Damit vom PC/R15 Register gelesen werden kann, könnten in die Fetch und Decode Pipelinestufen zwei Addierer den +8 Offset berechnen, oder wie hier den um +4 erhöhten PC des nächsten Befehls verwenden, und so einen Addierer sparen.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Grafiken/PipelineProzessor-vollstaendig.png}
+\caption{Der vollständige Pipeline Prozessor mit wie in \ref{fig:kontrolleinheit} dargestellt, aufgeteilter Kontrolleinheit.}
+\end{figure}
+
+\subsection{Hazards}
+Hazards können beim Pipeline Prozessor auftreten, wenn eine Instruktion vom Ergebnis einer vorherigen abhängt, dieser aber noch kein Ergebnis geliefert hat.\\
+Wir unterscheiden \textbf{Data Hazards} - Neuer Wert von Register noch nicht in Registerfeld eingetragen, und \textbf{Control Hazards} - Unklar welche Instruktion als nächstes ausgeführt werden muss.
+
+\subsubsection{Data Hazard}
+Ein Read-after-write Hazard (RAW) tritt auf, wenn eine vorherige Instruktion den neuen Registerwert noch nicht geschrieben hat, aber eine nachfolgende auf dieses Registerfeld zugreift.\\
+
+Möglichkeiten um diesen Hazard zu umgehen sind:
+\begin{itemize}
+\item Wartezeiten einplanen, d.h. nops (no operations) zur Compile-Zeit einplanen und Ablaufplanung
+\item Maschinencode zur Compile-Zeit umstellen (reordering)
+\item Daten zur Laufzeit umleiten (bypassing)
+\item Prozessor zur Laufzeit anhalten, bis Daten da sind (stalling)
+\end{itemize}
+
+Bei nops werden leere Instruktionen durch den Compiler in den Programmcode eingefügt, sodass benötigte Daten einen Takt weiter verarbeitet werden, und dann entsprechend aus dem Register gelesen werden können.\\
+
+Beim Bypassing werden Ergebnisse aus anderen Pipelinestufen zu den benötigten Stellen weitergeleitet, um diese Ergebnisse dort zu verwenden, auch wenn diese noch nicht ins Register geschrieben wurden.\\
+
+Beim stalling wird ein Schritt der Befehlsausführung, z.B. das Instruction Decode wiederholt um so einen zusätzlichen Takt für die Ausführung zu benötigen. Dadurch kann auf das Ergebnis eines Lade Befehls gewartet werden.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.55]{Grafiken/Stalling.png}
+\caption{Stalling zur Vermeidung eines Daten Hazards}
+\end{figure}
+
+\subsubsection{Control Hazard}
+
+Bei einem Sprungbefehl werden die direkt nachfolgenden Instruktionen aufgrund der Natur des Prozessors geladen, aber ggf. nicht benötigt. Diese Instruktionen müssen nun aus dem Prozessor geflushed werden, also deren Ausführung unterbunden werden.\\
+Bis das Ergebnis des Sprunges allerdings durch alle Pipelinestufen propagiert ist, dauert es mehrere Takte, obwohl das Ergebnis bereits früher vorliegt. Dies kann durch eine direkte Verbindung vom Addierer welche den PC mit dem Offset addiert, mit dem Register des nächsten PCs erreicht werden.\\
+
+Damit dies möglich ist wird eine weitere Kontrolleinheit - die Hazard Unit benötigt.
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/HazardUnit.png}
+\caption{Die Hazard Unit steuert die für die Hazard Bewältigung benötigten Signale}
+\end{figure}
+
+%%if anything gets added above this needs to be removed 
+\newpage
+
+\section{Vorlesung 10}
+\subsection{Leistungsbewertung 1}
+Leistungsfähigkeit sowohl von Hardware, als auch OS abhängig.\\
+Einige Leistungskriterien für Rechnersysteme sind:
+\begin{itemize}
+\item Taktfrequenz $f=\frac{1}{T}$, T Periodendauer
+\item Anzahl der Prozessoren
+\item Größe und Art des Speichers
+\item Antwortzeiten: Abhängig vom Aufgabentyp
+\item Durchsatz: Relevanz im Rechenzentrum 
+\item Ausführungszeit: Reine CPU Zeit ohne Ein-/Ausgabe
+\end{itemize} 
+
+Ausführungszeit bestimmt als:\\
+\begin{itemize}
+\item system CPU time: CPU-Zeit für Betriebssystemaufgaben
+\item user CPU time: CPU-Zeit die zur Ausführung eines Programms benötigt wird
+\end{itemize}
+
+Leistungsumsatz:
+$$P \equiv U^2 \cdot f \cdot C_L$$
+
+Taktzyklen:\\
+Für Eintakt \# Instruktionen = \# Takte\\
+Für Mehrtakt ist $\frac{\text{Takte}}{\text{Instruktion}}$ = clock cycles per instruction (CPI)\\
+$\frac{1}{\text{CPI}} = \frac{\text{Instruktionen}}{\text{Takt}} = \text{IPC}$ Instructions per cycle
+
+Einfaches Maß ist MIPS - Million Instructions per second.
+
+Bei der Klassifikation nach Flynn wird unterteilt in Instruction Streams und Data Streams.
+\begin{itemize}
+\item SI - Single Instruction
+\item MI - Multiple Instruction (mehrere Befehle zu einem Zeitpunkt)
+\item SD - Single Data
+\item MD - Multiple Data
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.7]{Grafiken/Klassifikation-Flynn.png}
+\caption{Veranschaulichung der Klassen von Flynn, MISD existiert nicht}
+\end{figure}
+
+\subsection{Betriebssysteme}
+
+\begin{quote}
+Die Programme eines digitalen Rechensystems, die zusammen mit den Eigenschaften der Rechenanlage die Grundlage der möglichen Betriebsarten des digitalen Rechensystems bilden und insbesondere die Abwicklung von Programmen steuern und überwachen. - Def. Betriebssystem nach DIN 44300
+\end{quote}
+
+Zu den Aufgaben des Betriebssystems gehören:
+\begin{itemize}
+\item Geräteüberwachung und -steuerung
+\item Unterbrechungssteuerung
+\item Ablaufsteuerung
+\item Datenhaltung
+\item Einhaltung von Qualitätsanforderungen
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.7]{Grafiken/VerfeinertesSchichtenmodell.png}
+\caption{Darstellung des Schichtenmodells mit Schnittstellen zwischen Komponenten}
+\end{figure}
+
+Der Prozessor kann sich in verschiedenen Betriebszuständen befinden:\\
+Maschinenzustand, der Prozessor kann aus/an geschaltet sein, oder laden\\
+Privilegierungszustand:
+\begin{itemize}
+\item Anwenderzustand: nicht privilegiert, nur eingeschränkter Befehlsvorrat
+\item Systemzustand: privilegiert, voller Befehlsvorrat
+\end{itemize}
+Ein Befehl heißt privilegiert, wenn er ausschließlich im Systemzustand ausführbar ist.
+
+\newpage
+
+\subsection{Ausnahmebehandlung}
+Ohne Unterbrechungen ist die Arbeitsweise des Rechners:
+\begin{enumerate}
+\item Prozessor stößt Tätigkeit an
+\item Gerät arbeitet selbständig, Prozessor muss warten
+\item Prozessor arbeitet weiter
+\end{enumerate}
+Keine Parallelität und damit schlechte Ausnutzung des Prozessors.\\
+
+Mit Unterbrechungen ist die Arbeitsweise:
+\begin{enumerate}
+\item Prozessor stößt Tätigkeit an
+\item Gerät arbeitet selbständig, Prozessor arbeitet parallel weiter
+\item Am Ende meldet sich das Gerät mit einer Unterbrechung beim Prozessor
+\end{enumerate}
+
+Ein solcher Interrupt ist ein Signal welches den Befehlszyklus des Prozessors abändert/unterbricht und diesen an einer bestimmten Stelle fortführt. Man unterscheidet grob:
+\begin{itemize}
+\item Programmbezogene Unterbrechungen (z.B. arith. Fehler, Adressfehler, falsche Befehle, ...)
+\item Systembezogene Unterbrechungen (z.B. E/A-Unterbrechung, Prozessoranrufe, ...)
+\item Maschinenfehler
+\end{itemize}
+
+Eine programmbezogene Unterbrechung trifft den Verursacher.\\
+Systemaufrufe können auch als Interrupts zwischen nieder- und höherprivilegierten Zuständen wechseln, dadurch werden Dienste des Betriebssystems für den Benutzer verfügbar.
+
+\section{Vorlesung 11}
+\subsection{Zahlendarstellung}
+Um auch reelle Zahlen darstellen zu können, muss ein Weg gefunden werden die Kommastelle zu repräsentieren.\\
+Möglichkeiten hierzu sind:
+\begin{itemize}
+\item Festkommadarstellung
+\item Gleitkommadarstellung
+\end{itemize} 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/Zahlendarstellung.png}
+\caption{Zahlendarstellung in Rechnersystemen}
+\end{figure}
+
+Bei der Festkommadarstellung wird das Komma in der internen Zahlenabbildung weggelassen und man merkt sich wo es stehen müsste. Zum Programmbeginn wird die Kommastelle der entsprechenden Variablen definiert und bleibt dann während des Programms fest, deshalb \textbf{Fest}komma.\\
+
+Bei der Gleitkommadarstellung auch halblogarithmische Darstellung ist die Kommastelle Bestandteil der Zahl und kann daher im Laufe der Zeit verändert werden. Diese Darstellung ist in ANSI/IEEE 754 spezifiziert und ist weltweit für den Datenaustausch und Rechenwerke standardisiert. Im Standard sind single, double und extended precision definiert.\\
+
+Die Gleitkommadarstellung setzt sich aus dem Sign Bit (höchstwertige Position), dem biased Exponent und Fraction. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.6]{Grafiken/IEEE754.png}
+\caption{Precision im IEEE 754 Standard}
+\end{figure}
+
+Gleitkommazahlen in eingebetteten Systemen ohne Hardware-Unterstützung sollte vermieden werden.\\
+Es existieren auch single precision Register (s0 - s31) und double precision register (d0 - d31) in Assembler, sowie passende Befehle für Addition (vadd.f64) und Loading, etc..\\
+Der Befehl cpuinfo gibt Informationen über die CPU Architektur und Features an.\\
+
+Gleitkommazahlen können entweder mit NEON oder VFP verarbeitet werden.
+
+\subsection{Leistungsbewertung 2}
+
+Leistungsmaße sind:
+\begin{itemize}
+\item Taktfrequenz
+\item CPI Rate (Clock Cycles per Instruction)
+\item MIPS Rate (Million Instructions per Second)
+\item MFLOPS (Million Floating-point Operations per Second)
+\end{itemize}
+
+Zur Messungen können Benchmarks verwendet werden, wobei allerdings das Problem besteht dass häufig Compiler so optimiert werden, dass gängige Benchmarks schneller laufen. Arten von Benchmarks sind:
+\begin{itemize}
+\item Reale Programme
+\item Kernels: kritische Auszüge aus realen Programmen
+\item Toy Benchmarks: z.B. Quicksort
+\item Synthetische Benchmarks: Spezielle Programme zur Leistungsevaluation
+\end{itemize}
+
+Benchmarks sind: SPEC, gzip und bzip.
+
+BogoMips ist unwissenschaftlicher Benchmark, und ermittelt Wert beim Booten um Warteschleifen zu kalibrieren.
+
+\subsection{NEON}
+
+Dedizierte Funktionseinheit zur Beschleunigung der Berechnung von Ganz- und Gleitkommazahlen.
+Beschleunigen Anwendungen der Signalverarbeitung, Videocodierung, etc.
+
+NEON führt Packed SIMD aus, d.h. Register werden als Vektoren eines Datentyps betrachtet.\\
+NEON hat 32 128 Bit Register welche auch paarweise kombiniert werden können.\\
+
+Die Resultate von Operationen unterliegen der Saturations-Arithmetik.  Hierbei liegen alle Werte zwischen einem maximalen und minimalen Wert. Liegt ein Resultat einer Operation über dem Maximum wird es auf das Maximum gesetzt, liegt es unter dem Minimum auf das Minimum.\\
+
+Neon kann auf vier Wege benutzt werden:
+\begin{itemize}
+\item NEON optimized libraries (OpenMax DL, Ne10)
+\item Vectorizing compiler (gcc)
+\item NEON intrinsics
+\item NEON assembly
+\end{itemize}
 \end{document}
