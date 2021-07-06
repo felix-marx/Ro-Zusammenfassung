@@ -195,6 +195,7 @@ Speicher können danach klassifiziert werden, ob sie für den Programmierer \tex
 \centering
 \includegraphics[scale=0.5]{Grafiken/Speicherhierarchie.png}
 \caption{Speicherhierarchie, die Größe der Speicher nimmt nach oben ab, die Geschwindigkeit nimmt zu}
+\label{pic:Speicherhierarchie}
 \end{figure}
 
 \subsection{Einführung Assembler}
@@ -1191,4 +1192,142 @@ Neon kann auf vier Wege benutzt werden:
 \item NEON intrinsics
 \item NEON assembly
 \end{itemize}
+
+\section{Vorlesung 12}
+
+\subsection{Speicher}
+
+Das Speichersystem besteht aus einer Hierarchie unterschiedlicher Speichertechnologien und -techniken. Zugriffe auf diesen Speicher sind sind sequentiell (von Neumann) bzw. kann auch parallel passieren (Harvard).
+
+Die Speicherhierarchie lässt sich in einer sogenannten Speicherpyramide darstellen, siehe \ref{pic:Speicherhierarchie}.\\
+
+Speicher lässt sich anhand mehrerer Eigenschaften vergleichen:\\
+
+Kosten und Zugriffszeit:\\
+Kosten werden in Dollar/Bit bzw. Dollar/MByte gemessen, wobei i.d.R. gilt geringere Zugriffszeit $\rightarrow$ höhere Kosten.
+\begin{itemize}
+\item Zugriffszeit: Durchschnittliche Zeit um ein Wort aus dem Speicher zu lesen
+\item Zykluszeit: Minimale Zeit zwischen zwei Speicherzugriffen
+\item Bandbreite: maximale Datenmenge die pro Sekunde übertragen werden kann (Byte/sec)
+\end{itemize}
+
+Zugriffsverfahren:
+\begin{itemize}
+\item Random Access: 
+	\begin{itemize}
+	\item Dynamischer RAM (DRAM) z.B. Hauptspeicher
+	\item Statischer RAM (SRAM): schneller und teurer als DRAM, z.B. Cache
+	\end{itemize}
+\item serieller Zugriff: Festplatten, optische Platten, Magnetband
+\end{itemize}
+
+Veränderbarkeit des Speichers:
+\begin{itemize}
+\item Read-only: Kein Überschreiben, nur lesen, Inhalt beim Fabrikationsprozess festgelegt
+\item Read-write: Inhalt veränderbar, wird als Haupt- und Cache-Speicher  verwendet
+\item Read-mostly: PROM-Halbleiterspeicher, wird für BIOS benutzt
+\end{itemize}
+
+Permanenz:
+\begin{itemize}
+\item Flüchtiger Speicher: geht bei Stromausfall verloren (z.B. Register, Hauptspeicher)
+	\begin{itemize}
+	\item dynamische Speicher: Periodisch Spannung anlegen um Daten zu erneuern (Refreshing)
+	\item statische Speicher: kein Refreshing nötig
+	\end{itemize}
+\item Nicht flüchtige Speicher: Nicht von angelegtem Strom abhängig (z.B. ROM, Festplatte)
+\end{itemize}
+
+Speichertechnologien:\\
+
+SRAM speichert Informationen mit zwei gekoppelten Invertern (Bistabile Schaltung). Die Inverter werden jeweils mit sechs Transistoren welche in einer 6T-Zelle angeordnet sind realisiert.
+
+DRAM speichert Informationen in einem Kondensator, welcher auch als 1T-Zelle bezeichnet wird. Der Kondensator entlädt sich und muss damit Refreshed werden um diese wieder aufzufrischen. Der Auf-/Entladeprozess ist hierbei eine Kurve\\
+
+\begin{figure}[h!]
+   \begin{minipage}[b]{.4\linewidth} % [b] => Ausrichtung an \caption
+      \includegraphics[width=\linewidth]{Grafiken/SRAM.png}
+      \caption{SRAM Speicher}
+   \end{minipage}
+   \hspace{.1\linewidth}% Abstand zwischen Bilder
+   \begin{minipage}[b]{.4\linewidth} % [b] => Ausrichtung an \caption
+      \includegraphics[width=\linewidth]{Grafiken/DRAM.png}
+      \caption{DRAM Speicher}
+   \end{minipage}
+\end{figure}
+
+\subsection{Speicherorganisation}
+
+Eigenschaften eines RAM-Chips sind durch die Anzahl an adressierbarer Plätze und Breite jedes adressierbaren Platzes in Bit gegeben.
+Damit bezeichnet 256K $\times$ 1 SRAM einen SRAM mit $256K = 2^{18}$ Einträge mit 1 Bit Breite, d.h. es gibt 18 Adresseingänge mit einem 1 Bit Datenein-/ausgang.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{Grafiken/AbstrakterDRAM.png}
+\caption{Abstrakte Repräsentation eines DRAM Chips}
+\end{figure}
+
+Der Zugriff geschieht in zwei Phasen einem Row Address Strobe (RAS), wo die gesuchte Zeile in den internen Buffer kopiert wird. Anschließend wird beim Column Address Strobe die entsprechende Spalte selektiert und über den Datenkanal zurückgegeben.\\
+Mehrere solcher Module können kombiniert werden um größere Wörter abzuspeichern.\\
+Der Hauptspeicher ist mittels eines Busses mit der I/O Bridge und der CPU verbunden.
+
+\subsection{Lokalität}
+Das Lokalitätsprinzip beschreibt, dass bei der Programmausführung nur auf einen relativ geringen Teil des Speichers zugegriffen wird.
+
+Man unterscheidet
+\begin{itemize}
+\item \textbf{zeitliche (temporale) Lokalität}: Nach einem Zugriff auf einen bestimmten Datensatz wird mit großer Wahrscheinlichkeit bald erneut darauf zugegriffen (z.B. durch Schleifen)
+\item \textbf{räumliche Lokalität}: Nach einem Zugriff wird mit großer Wahrscheinlichkeit auf einen in unmittelbarer Nähe liegenden Speicher zugegriffen (z.B. Matrizen, sequentielle Instruktionen)
+\end{itemize} 
+
+Gut geschriebene Programme haben eine gute Lokalität, den das Lokalitätsprinzip hat eine enorme Auswirkung auf die Performanz eines Rechnersystems. Auch hier kann man zwischen der Lokalität der Daten und der der Befehle unterscheiden.
+
+Beispiele für Lokalität:
+
+\begin{lstlisting}
+int sumvec (int v[N]) {
+	int i, sum = 0;
+	for (i = 0; i < N; i++)
+		sum += v[i];
+	return sum;
+}
+\end{lstlisting}
+Dieses Beispiel hat gute räumliche Lokalität, da Elemente des Vektors sequentiell gelesen werden.
+Jedoch schlechte zeitliche Lokalität, da wir jedes Vektorelement nur einmal lesen.
+
+\begin{lstlisting}
+int sumarrayrows (int a[M][N]) {
+	int i, j, sum = 0;
+	for (j=0; j<N; j++)
+		for (i=0; i<M; i++)
+			sum += a[i][j]
+	return sum;
+}
+\end{lstlisting}
+Hier haben wir sowohl schlechte räumliche, als auch schlechte zeitliche Lokalität, denn wir summieren die Werte nicht so wie im Speicher liegen (Zeilenweise), sondern Spaltenweise. Außerdem lesen wir auch hier alle Elemente nur einmal.\\
+
+Da auch Befehle Daten sind, kann man sagen dass Schleifen gute räumliche und zeitliche Lokalität haben, da wir sie mehrmals durchlaufen.\\
+
+Bei einer guten Lokalität kann sich die Laufzeit eines Programmes signifikant verbessern.
+
+\subsection{Cache}
+Der Cache ist ein kleiner und schneller Speicher (SRAM), welcher auf der Ebene k eine Teilmenge der Daten eines größeren und langsameren Speicher auf Level k+1 speichert.\\
+Wenn die Lokalität nicht beachtet wird, muss durch mehrere Cache Ebenen hindurch auf Daten zugegriffen werden.
+
+Werden gesuchte Daten auf einer Ebene k gefunden, spricht man von einem \textbf{Cache Hit} und der Wert wird direkt aus Ebene k gelesen. Dadurch ergibt sich ein Geschwindigkeitsvorteil.\\
+
+Werden die Daten nicht gefunden spricht man von einem \textbf{Cache Miss} und die Daten müssen aus dem Level k+1 geholt werden. Ist der k-te Cache voll, müssen Daten dieses Caches überschrieben werden. Dies nennt man Ersetzung und dafür existieren verschiedene Strategien. 
+\begin{itemize}
+\item Zufallsersetzung
+\item Least-recently used (LRU) Ersetzung
+\end{itemize} 
+
+Desto weiter wir im Cache absteigen müssen, desto größer wird die Latenz. Auch zwischen den L1, L2, L3 Caches existieren Unterschiede.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.7]{Grafiken/ARMCachehierarchie.png}
+\caption{Beim ARM A53 hat man getrennte Caches für Daten (d-cache) und Befehle (i-cache) auf Level 1 mit Größen L1: 2x 32KB, L2: 256KB, L3: 8MB}
+\end{figure}
+
 \end{document}
